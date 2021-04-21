@@ -1,4 +1,4 @@
-from . import parse_all_images
+from car_parser import parse_all_images
 import os
 
 ROOT_PAGE_URL = 'https://car.autohome.com.cn/pic/series-s32040/3170.html'

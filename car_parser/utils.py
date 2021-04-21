@@ -36,9 +36,8 @@ def parse_all_images(root_page_url, folder):
     car_model_selector = "div > div.uibox-con-search.js-context > div:nth-child(1) > div.search-pic-right > dl > dd:nth-child(8) > ul > li > a"
     for link in soup.select(car_model_selector):
         # Form each link after getting a result
-        links.append(
-            f'{"/".join(root_page_url.split("/")[:3])}{link.attrs["href"]}')
-
+        link = f'{"/".join(root_page_url.split("/")[:3])}{link.attrs["href"]}'
+        links.append(link)
     # Make a directory for the images.
     import os
     if not os.path.exists(folder):
@@ -53,14 +52,18 @@ def parse_all_images(root_page_url, folder):
         soup = bs4.BeautifulSoup(car_page.text)
 
         # 3.2. Select all the elements by selector "div.column.contentright.fn-visible > div:nth-child(7) > div > div > div.uibox-con > ul > li > a > img"
-        car_img_selector = "div.column.contentright.fn-visible > div:nth-child(7) > div > div > div.uibox-con > ul > li > a > img"
-        car_img_list = soup.select(car_img_selector)
+        car_img_selector = "div.column.contentright.fn-visible > div:nth-child(7) > div > div > div.uibox-con > ul > li > a"
+        car_img_list = soup.select(car_img_selector)[:-1]
 
         # 3.3. Process each of selected images
         car_model_img_index = 0
         for car_img in car_img_list:
             # TODO:find out how to get "src" from <img src="...">
-            car_img_link = f'https:{car_img.attrs["src"]}'
+            car_page_link = f'{"/".join(root_page_url.split("/")[:3])}:{car_img.attrs["href"]}'
+            car_picture_page = requests.get(car_page_link)
+            car_picture_page_soup = bs4.BeautifulSoup(car_picture_page.text)
+            car_picture_page_selector = "#img"
+            car_img_link = f'https:{car_picture_page_soup.select_one(car_picture_page_selector).attrs["src"]}'
             save_single_image(
                 car_img_link, f"{folder}/{car_model_index}-{car_model_img_index}.{car_img_link.split('.')[-1]}")
             car_model_img_index += 1
